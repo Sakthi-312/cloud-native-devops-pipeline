@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: portal
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: 947808343597.dkr.ecr.ap-south-1.amazonaws.com/terraform-portal-frontend:v1
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: portal
+spec:
+  type: LoadBalancer
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80

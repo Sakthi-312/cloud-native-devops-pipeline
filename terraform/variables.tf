@@ -5,7 +5,7 @@ variable "region" {
 
 variable "project" {
   type    = string
-  default = "portal"
+  default = "terraform-portal"
 }
 
 variable "db_password" {

@@ -1,4 +1,4 @@
-output "cluster_name" {
+output "terrform-cluster-name" {
   value = module.eks.cluster_name
 }
 
