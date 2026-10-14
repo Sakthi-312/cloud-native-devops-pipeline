@@ -17,3 +17,7 @@ output "vpc_id" {
 output "lb_controller_role_arn" {
   value = module.lb_controller_irsa.iam_role_arn
 }
+
+output "github_actions_role_arn" {
+  value = aws_iam_role.gha.arn
+}

@@ -1,0 +1,73 @@
+name: ci-cd
+
+on:
+  push:
+    branches: [main]
+    paths: ["app/**", "k8s/**", ".github/workflows/**"]
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # needed for OIDC
+  contents: read
+
+env:
+  AWS_REGION: ap-south-1
+  CLUSTER: terraform-portal-eks
+  NAMESPACE: portal
+
+jobs:
+  build-scan-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build image
+        run: |
+          docker build \
+            -t ${{ steps.ecr.outputs.registry }}/terraform-portal-${{ matrix.component }}:${{ github.sha }} \
+            ./app/${{ matrix.component }}
+
+      - name: Trivy scan (fails on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ steps.ecr.outputs.registry }}/terraform-portal-${{ matrix.component }}:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+
+      - name: Push image
+        run: |
+          docker push ${{ steps.ecr.outputs.registry }}/terraform-portal-${{ matrix.component }}:${{ github.sha }}
+
+  deploy:
+    needs: build-scan-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Deploy to EKS
+        run: |
+          aws eks update-kubeconfig --name $CLUSTER --region $AWS_REGION
+          REG=${{ steps.ecr.outputs.registry }}
+          kubectl set image deployment/backend  backend=$REG/terraform-portal-backend:${{ github.sha }}  -n $NAMESPACE
+          kubectl set image deployment/frontend frontend=$REG/terraform-portal-frontend:${{ github.sha }} -n $NAMESPACE
+          kubectl rollout status deployment/backend  -n $NAMESPACE --timeout=180s
+          kubectl rollout status deployment/frontend -n $NAMESPACE --timeout=180s
