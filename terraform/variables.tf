@@ -12,3 +12,8 @@ variable "db_password" {
   type      = string
   sensitive = true
 }
+
+variable "github_repo" {
+  type    = string
+  default = "Sakthi-312/cloud-native-devops-pipeline"
+}
