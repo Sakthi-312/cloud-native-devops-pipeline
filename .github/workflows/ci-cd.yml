@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write   # needed for OIDC
+  id-token: write   # needed for AWS OIDC
   contents: read
 
 env:
