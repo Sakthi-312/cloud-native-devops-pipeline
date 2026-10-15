@@ -39,7 +39,7 @@ jobs:
             ./app/${{ matrix.component }}
 
       - name: Trivy scan (fails on HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: ${{ steps.ecr.outputs.registry }}/terraform-portal-${{ matrix.component }}:${{ github.sha }}
           format: table
