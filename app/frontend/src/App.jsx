@@ -19,6 +19,7 @@ export default function App() {
       body: JSON.stringify({ name, role }),
     });
     setName('');
+	  i
     load();
   };
 
@@ -27,8 +28,8 @@ export default function App() {
       <h1>Student-Teacher Portal</h1>
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
       <select value={role} onChange={(e) => setRole(e.target.value)}>
-        <option value="student">Student</option>
-        <option value="teacher">Teacher</option>
+        <option value="student">Students</option>
+        <option value="teacher">Teachers</option>
       </select>
       <button onClick={add}>Add</button>
       <ul>
