@@ -19,7 +19,6 @@ export default function App() {
       body: JSON.stringify({ name, role }),
     });
     setName('');
-	  i
     load();
   };
 
