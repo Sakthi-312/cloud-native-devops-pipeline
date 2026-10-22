@@ -24,7 +24,7 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: 520, margin: '40px auto', fontFamily: 'sans-serif' }}>
-      <h1>Student-Teacher Portal After Editing and Push</h1>
+      <h1>Student-Teacher Portal After Editing and Pushed</h1>
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
       <select value={role} onChange={(e) => setRole(e.target.value)}>
         <option value="student">Student</option>
